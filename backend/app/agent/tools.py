@@ -12,12 +12,15 @@ def search_competitor_pricing(query: str) -> str:
     if not GOOGLE_CSE_API_KEY or not GOOGLE_CSE_CX:
         return "Search unavailable: Google Custom Search API key or CX not configured."
 
-    service = build("customsearch", "v1", developerKey=GOOGLE_CSE_API_KEY)
-    result = service.cse().list(q=query, cx=GOOGLE_CSE_CX, num=5).execute()
+    try:
+        service = build("customsearch", "v1", developerKey=GOOGLE_CSE_API_KEY)
+        result = service.cse().list(q=query, cx=GOOGLE_CSE_CX, num=5).execute()
+    except Exception as e:
+        return f"Search failed: {e}. Use your general knowledge of market pricing instead."
 
     items = result.get("items", [])
     if not items:
-        return "No search results found."
+        return "No search results found. Use your general knowledge of market pricing instead."
 
     results = []
     for item in items:

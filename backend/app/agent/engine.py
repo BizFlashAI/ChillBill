@@ -110,8 +110,15 @@ def run_optimization_agent(
                 ToolMessage(content=str(tool_result), tool_call_id=tool_call["id"])
             )
 
-    # Parse the final response
-    final_text = response.content
+    # Parse the final response — content may be str or list of parts
+    raw_content = response.content
+    if isinstance(raw_content, list):
+        final_text = " ".join(
+            part.get("text", "") if isinstance(part, dict) else str(part)
+            for part in raw_content
+        ).strip()
+    else:
+        final_text = str(raw_content) if raw_content else ""
     return _parse_agent_output(final_text)
 
 
