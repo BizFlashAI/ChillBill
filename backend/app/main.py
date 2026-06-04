@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routers import bills, insights, reminders
+from app.routers import agent, bills, insights, reminders
 
 # Create all tables
 Base.metadata.create_all(bind=engine)
@@ -24,6 +24,7 @@ app.add_middleware(
 app.include_router(bills.router)
 app.include_router(reminders.router)
 app.include_router(insights.router)
+app.include_router(agent.router)
 
 
 @app.get("/health")

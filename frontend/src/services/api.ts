@@ -34,6 +34,13 @@ export const billsApi = {
   },
 };
 
+export const agentApi = {
+  runForBill: async (billId: string): Promise<{ status: string; message: string }> => {
+    const { data } = await client.post(`/api/v1/agent/run/${billId}`);
+    return data;
+  },
+};
+
 export const insightsApi = {
   getActive: async (): Promise<AgentInsight[]> => {
     const { data } = await client.get<AgentInsight[]>("/api/v1/insights", {

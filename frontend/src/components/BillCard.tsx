@@ -1,9 +1,11 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import type { Bill } from "../types";
 
 interface BillCardProps {
   bill: Bill;
   onPress?: (bill: Bill) => void;
+  onOptimize?: (bill: Bill) => void;
+  isOptimizing?: boolean;
 }
 
 function getDaysUntil(dateStr: string): number {
@@ -21,7 +23,7 @@ function getBadgeStyle(daysUntil: number) {
   return { bg: "#D1FAE5", text: "#059669", label: `${daysUntil}d` };
 }
 
-export default function BillCard({ bill, onPress }: BillCardProps) {
+export default function BillCard({ bill, onPress, onOptimize, isOptimizing }: BillCardProps) {
   const daysUntil = getDaysUntil(bill.billing_date);
   const badge = getBadgeStyle(daysUntil);
 
@@ -34,6 +36,26 @@ export default function BillCard({ bill, onPress }: BillCardProps) {
       <View style={styles.left}>
         <Text style={styles.provider}>{bill.provider}</Text>
         <Text style={styles.billType}>{bill.bill_type}</Text>
+        {bill.is_agent_allowed && onOptimize && (
+          <TouchableOpacity
+            style={[styles.optimizeBtn, isOptimizing && styles.optimizeBtnDisabled]}
+            onPress={(e) => {
+              e.stopPropagation();
+              if (!isOptimizing) onOptimize(bill);
+            }}
+            activeOpacity={0.7}
+            disabled={isOptimizing}
+          >
+            {isOptimizing ? (
+              <View style={styles.optimizeRow}>
+                <ActivityIndicator size="small" color="#7C3AED" />
+                <Text style={styles.optimizeTextActive}>Analyzing...</Text>
+              </View>
+            ) : (
+              <Text style={styles.optimizeText}>🤖 Optimize</Text>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.right}>
         <Text style={styles.amount}>${bill.amount.toFixed(2)}</Text>
@@ -75,4 +97,30 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   badgeText: { fontSize: 12, fontWeight: "600" },
+  optimizeBtn: {
+    marginTop: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: "#EDE9FE",
+    borderRadius: 8,
+    alignSelf: "flex-start",
+  },
+  optimizeBtnDisabled: {
+    opacity: 0.7,
+  },
+  optimizeText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#7C3AED",
+  },
+  optimizeTextActive: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#7C3AED",
+    marginLeft: 6,
+  },
+  optimizeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 });

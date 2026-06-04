@@ -7,12 +7,16 @@ interface CategorySectionProps {
   category: Category;
   bills: Bill[];
   onBillPress?: (bill: Bill) => void;
+  onOptimize?: (bill: Bill) => void;
+  agentRunning?: string | null;
 }
 
 export default function CategorySection({
   category,
   bills,
   onBillPress,
+  onOptimize,
+  agentRunning,
 }: CategorySectionProps) {
   const config = CATEGORY_CONFIG[category];
   const total = bills.reduce((sum, b) => sum + b.amount, 0);
@@ -30,7 +34,13 @@ export default function CategorySection({
         <Text style={styles.empty}>No bills yet</Text>
       ) : (
         bills.map((bill) => (
-          <BillCard key={bill.id} bill={bill} onPress={onBillPress} />
+          <BillCard
+            key={bill.id}
+            bill={bill}
+            onPress={onBillPress}
+            onOptimize={onOptimize}
+            isOptimizing={agentRunning === bill.id}
+          />
         ))
       )}
     </View>
