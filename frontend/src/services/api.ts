@@ -1,10 +1,19 @@
 import axios from "axios";
 import type { AgentInsight, Bill, BillCreate, Category } from "../types";
 import { API_BASE_URL } from "../utils/constants";
+import { getIdToken } from "./firebase";
 
 const client = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
+});
+
+client.interceptors.request.use(async (config) => {
+  const token = await getIdToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export const billsApi = {

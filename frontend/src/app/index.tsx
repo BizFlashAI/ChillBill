@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import { useBillStore } from "../store/useBillStore";
+import { useAuthStore } from "../store/useAuthStore";
 import type { Bill, Category } from "../types";
 import CategorySection from "../components/CategorySection";
 import AgentInsightBanner from "../components/AgentInsightBanner";
@@ -18,14 +19,17 @@ const CATEGORIES: Category[] = ["home", "personal", "subscriptions"];
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { user, logout } = useAuthStore();
   const { bills, insights, loading, fetchBills, fetchInsights, dismissInsight } =
     useBillStore();
 
   useFocusEffect(
     useCallback(() => {
-      fetchBills();
-      fetchInsights();
-    }, [fetchBills, fetchInsights])
+      if (user) {
+        fetchBills();
+        fetchInsights();
+      }
+    }, [user, fetchBills, fetchInsights])
   );
 
   const billsByCategory = useMemo(() => {
@@ -47,6 +51,8 @@ export default function HomeScreen() {
     [bills]
   );
 
+  if (!user) return <Redirect href="/login" />;
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -63,8 +69,13 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.appName}>ChillBill</Text>
-          <Text style={styles.subtitle}>Stay on top of your finances</Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.appName}>ChillBill</Text>
+            <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+              <Text style={styles.logoutText}>Sign Out</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.subtitle}>{user.email}</Text>
         </View>
 
         {/* Total Monthly */}
@@ -113,8 +124,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9FAFB" },
   scroll: { padding: 20, paddingBottom: 100 },
   header: { marginBottom: 20 },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   appName: { fontSize: 28, fontWeight: "800", color: "#111827" },
   subtitle: { fontSize: 14, color: "#6B7280", marginTop: 2 },
+  logoutBtn: { paddingVertical: 6, paddingHorizontal: 12 },
+  logoutText: { color: "#DC2626", fontSize: 14, fontWeight: "600" },
   totalCard: {
     backgroundColor: "#111827",
     borderRadius: 16,

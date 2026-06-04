@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.auth import get_current_user
 from app.database import get_db
 from app.models import Bill, Reminder
 from app.schemas import ReminderCreate, ReminderResponse
 
-router = APIRouter(prefix="/api/v1/reminders", tags=["reminders"])
+router = APIRouter(
+    prefix="/api/v1/reminders",
+    tags=["reminders"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("", response_model=list[ReminderResponse])

@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.auth import get_current_user
 from app.database import get_db
 from app.models import AgentInsight
 from app.schemas import InsightResponse, InsightStatusUpdate
 
-router = APIRouter(prefix="/api/v1/insights", tags=["insights"])
+router = APIRouter(
+    prefix="/api/v1/insights",
+    tags=["insights"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("", response_model=list[InsightResponse])
