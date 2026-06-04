@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.auth import get_current_user
 from app.database import get_db
 from app.models import Bill
 from app.schemas import BillCreate, BillResponse, BillUpdate, CategoryEnum
 
-router = APIRouter(prefix="/api/v1/bills", tags=["bills"])
+router = APIRouter(
+    prefix="/api/v1/bills",
+    tags=["bills"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("", response_model=list[BillResponse])
