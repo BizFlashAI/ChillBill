@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { AgentInsight, Bill, BillCreate } from "../types";
-import { billsApi, insightsApi } from "../services/api";
+import { agentApi, billsApi, insightsApi } from "../services/api";
 
 interface BillStore {
   bills: Bill[];
@@ -14,6 +14,8 @@ interface BillStore {
   deleteBill: (id: string) => Promise<void>;
   fetchInsights: () => Promise<void>;
   dismissInsight: (id: string) => Promise<void>;
+  runAgent: (billId: string) => Promise<void>;
+  agentRunning: string | null;
 }
 
 export const useBillStore = create<BillStore>((set, get) => ({
@@ -21,6 +23,7 @@ export const useBillStore = create<BillStore>((set, get) => ({
   insights: [],
   loading: false,
   error: null,
+  agentRunning: null,
 
   fetchBills: async () => {
     set({ loading: true, error: null });
@@ -95,6 +98,22 @@ export const useBillStore = create<BillStore>((set, get) => ({
       set({ insights: get().insights.filter((i) => i.id !== id) });
     } catch {
       // Silently fail
+    }
+  },
+
+  runAgent: async (billId: string) => {
+    set({ agentRunning: billId });
+    try {
+      await agentApi.runForBill(billId);
+      // Wait briefly for background task to complete, then refresh insights
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const insights = await insightsApi.getActive();
+      set({ insights, agentRunning: null });
+    } catch (e) {
+      set({
+        error: e instanceof Error ? e.message : "Agent run failed",
+        agentRunning: null,
+      });
     }
   },
 }));

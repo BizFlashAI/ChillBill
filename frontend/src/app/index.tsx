@@ -18,8 +18,16 @@ const CATEGORIES: Category[] = ["home", "personal", "subscriptions"];
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { bills, insights, loading, fetchBills, fetchInsights, dismissInsight } =
-    useBillStore();
+  const {
+    bills,
+    insights,
+    loading,
+    fetchBills,
+    fetchInsights,
+    dismissInsight,
+    runAgent,
+    agentRunning,
+  } = useBillStore();
 
   useFocusEffect(
     useCallback(() => {
@@ -93,6 +101,8 @@ export default function HomeScreen() {
             key={cat}
             category={cat}
             bills={billsByCategory[cat]}
+            onOptimize={(bill) => runAgent(bill.id)}
+            agentRunning={agentRunning}
           />
         ))}
       </ScrollView>
